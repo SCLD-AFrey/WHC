@@ -6,23 +6,21 @@ public static class CommonTools
 {
     public static void SmartCreateDirectory(string p_directoryPath, out string p_message)
     {
-        p_message = string.Empty;
-        var dir = Path.GetDirectoryName(p_directoryPath);
-        Console.WriteLine(Path.GetDirectoryName(dir));
-        if (Directory.Exists(dir))
+        if (Directory.Exists(p_directoryPath))
         {
-            p_message = $"Directory {dir} already exists";
+            p_message = $"Directory {p_directoryPath} already exists";
+            Console.WriteLine(p_message);
             return;
         }
         try
         {
-            Directory.CreateDirectory(dir!);
-            p_message = $"Directory {dir} created";
+            Directory.CreateDirectory(p_directoryPath!);
+            p_message = $"Directory {p_directoryPath} created";
         } catch (Exception e)
         {
-            p_message = $"Directory {dir} not created: {e.Message}";
-            throw;
+            p_message = $"Directory {p_directoryPath} not created: {e.Message}";
         }
+        Console.WriteLine(p_message);
     }
     
     public static string GetEnumDescription(Enum p_value)

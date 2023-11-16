@@ -7,16 +7,17 @@ public class CommonFilesService
     public string ProjectDataFolder { get; set; }
     public string LogsPath { get; set; }
     public string DataPath { get; set; }
+    public string DbFile { get; set; }
     public string ReportsPath { get; set; }
     public string ConfigPath { get; set; }
+    public string ConfigFile { get; set; }
     public string FilesStoragePath { get; set; }
 
-    public CommonFilesService(string p_file)
+    public CommonFilesService()
     {
         SolutionDataFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "WHC");
-        
         ProjectDataFolder = Path.Combine(
             SolutionDataFolder, 
             "WHCLink");
@@ -25,14 +26,18 @@ public class CommonFilesService
             "Logs");
         DataPath = Path.Combine(
             ProjectDataFolder, 
-            "DB", 
+            "DB");
+        DbFile = Path.Combine(
+            DataPath, 
             "WHCLink.db");
         ReportsPath = Path.Combine(
             ProjectDataFolder, 
             "Reports");
         ConfigPath = Path.Combine(
             ProjectDataFolder, 
-            "Config", 
+            "Config");
+        ConfigFile = Path.Combine(
+            ConfigPath, 
             "config.json");
         FilesStoragePath = Path.Combine(
             ProjectDataFolder, 
