@@ -1,18 +1,20 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using WHC.CommonLibrary.Interfaces;
 using WHC.CommonLibrary.Models;
+// ReSharper disable InconsistentNaming
 
 namespace WHC.CommonLibrary.Services;
 
-public class ClientConfigurationService
+public class ClientConfigurationService : IClientConfigurationService
 {
     private readonly ILogger<ClientConfigurationService> m_logger;
-    private readonly CommonFilesService m_commonFiles;
-    private readonly EncryptionService m_encryptionService;
+    private readonly ICommonFilesService m_commonFiles;
+    private readonly IEncryptionService m_encryptionService;
     
     public ClientConfigurationService(ILogger<ClientConfigurationService> p_logger, 
-        CommonFilesService p_commonFiles, 
-        EncryptionService p_encryptionService)
+        ICommonFilesService p_commonFiles, 
+        IEncryptionService p_encryptionService)
     {
         m_logger = p_logger;
         m_commonFiles = p_commonFiles;
@@ -36,7 +38,7 @@ public class ClientConfigurationService
         var json = File.ReadAllText(m_commonFiles.ConfigPath);
         try
         {
-            ClientConfig = JsonSerializer.Deserialize<ClientConfiguration>(EncryptionService.DecryptString(json)!)!;
+            ClientConfig = JsonSerializer.Deserialize<ClientConfiguration>(m_encryptionService.DecryptString(json)!)!;
         }
         catch (Exception ex) 
         {
@@ -51,7 +53,7 @@ public class ClientConfigurationService
         try
         {
             var json = JsonSerializer.Serialize(ClientConfig);
-            File.WriteAllText(m_commonFiles.ConfigPath, EncryptionService.EncryptString(json));
+            File.WriteAllText(m_commonFiles.ConfigPath, m_encryptionService.EncryptString(json));
         }
         catch (Exception ex)
         {

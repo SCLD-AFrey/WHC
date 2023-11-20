@@ -1,4 +1,3 @@
-using Avalonia.Collections;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -11,7 +10,7 @@ public class CollectionSink : ILogEventSink
     private readonly ITextFormatter m_textFormatter =
         new MessageTemplateTextFormatter("{Timestamp:HH:mm:ss} - {Message}{Exception}");
 
-    public static AvaloniaList<ConsoleLogMessage> Events { get; set; } = new();
+    public static List<ConsoleLogMessage> Events { get; set; } = new();
 
     public void Emit(LogEvent p_logEvent)
     {
@@ -27,7 +26,7 @@ public class CollectionSink : ILogEventSink
         Events.Insert(0, message);
     }
 
-    public static void SetCollection(AvaloniaList<ConsoleLogMessage> p_sink)
+    public static void SetCollection(List<ConsoleLogMessage> p_sink)
     {
         Events = p_sink;
     }

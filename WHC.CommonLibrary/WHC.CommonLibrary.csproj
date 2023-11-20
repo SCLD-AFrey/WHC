@@ -7,15 +7,27 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.18" />
-        <PackageReference Include="DevExpress.Xpo" Version="23.1.6" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+        
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+
         <PackageReference Include="Serilog" Version="3.1.1" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+        <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
+        <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+        
+        <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.9" />
+        
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.9" /> 
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9" />
+
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="Configuration\" />
+      <Folder Include="Migrations\" />
     </ItemGroup>
 
 

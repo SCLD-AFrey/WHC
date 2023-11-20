@@ -1,10 +1,12 @@
 using System.Security.Cryptography;
 using System.Text;
+using WHC.CommonLibrary.Interfaces;
+
 // ReSharper disable IdentifierTypo
 
-namespace WHC.CommonLibrary;
+namespace WHC.CommonLibrary.Services;
 
-public class EncryptionService
+public class EncryptionService : IEncryptionService
 {
     private const int KeySize = 64;
     private const int Iterations = 350000;
@@ -32,7 +34,7 @@ public class EncryptionService
         return hashToCompare.SequenceEqual(Convert.FromHexString(p_hash));
     }
 
-    public static string EncryptString(string p_plainText)
+    public string EncryptString(string p_plainText)
     {
         using var aes = Aes.Create();
         aes.Key = Key;
@@ -50,7 +52,7 @@ public class EncryptionService
         return Convert.ToBase64String(msEncrypt.ToArray());
     }
 
-    public static string? DecryptString(string p_cipherText)
+    public string? DecryptString(string p_cipherText)
     {
         var buffer = Convert.FromBase64String(p_cipherText);
 

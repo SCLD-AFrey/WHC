@@ -49,8 +49,9 @@ public partial class AdminApp : Application
     private void ConfigureServices(IServiceCollection p_services)
     {
         p_services.AddSingleton<CommonFilesService>();
-        p_services.AddSingleton<DatabaseUtilities>();
+        //p_services.AddSingleton<DatabaseUtilities>();
         p_services.AddSingleton<EncryptionService>();
+        
         p_services.AddSingleton<ClientConfiguration>();
         p_services.AddSingleton<ClientConfigurationService>();
 

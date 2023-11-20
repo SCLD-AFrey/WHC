@@ -1,7 +1,10 @@
 // ReSharper disable MemberCanBePrivate.Global
-namespace WHC.CommonLibrary;
 
-public class CommonFilesService
+using WHC.CommonLibrary.Interfaces;
+
+namespace WHC.CommonLibrary.Services;
+
+public class CommonFilesService : ICommonFilesService
 {
     public string SolutionDataFolder { get; set; }
     public string ProjectDataFolder { get; set; }
@@ -27,21 +30,23 @@ public class CommonFilesService
         DataPath = Path.Combine(
             ProjectDataFolder, 
             "DB");
-        DbFile = Path.Combine(
-            DataPath, 
-            "WHCLink.db");
         ReportsPath = Path.Combine(
             ProjectDataFolder, 
             "Reports");
         ConfigPath = Path.Combine(
             ProjectDataFolder, 
             "Config");
-        ConfigFile = Path.Combine(
-            ConfigPath, 
-            "config.json");
         FilesStoragePath = Path.Combine(
             ProjectDataFolder, 
             "FilesStorage");
+        
+        
+        ConfigFile = Path.Combine(
+            ConfigPath, 
+            "config.json");
+        DbFile = Path.Combine(
+            DataPath, 
+            "WHCLink.db");
         
         CommonTools.SmartCreateDirectory(SolutionDataFolder, out _);
         CommonTools.SmartCreateDirectory(ProjectDataFolder, out _);

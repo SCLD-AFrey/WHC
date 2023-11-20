@@ -1,6 +1,6 @@
 namespace WHC.CommonLibrary.Enumerations;
 
-public enum EmailAddressType
+public enum AddressType
 {
     Home,
     Work,

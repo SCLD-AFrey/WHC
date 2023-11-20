@@ -9,7 +9,6 @@ public static class CommonTools
         if (Directory.Exists(p_directoryPath))
         {
             p_message = $"Directory {p_directoryPath} already exists";
-            Console.WriteLine(p_message);
             return;
         }
         try
@@ -20,18 +19,6 @@ public static class CommonTools
         {
             p_message = $"Directory {p_directoryPath} not created: {e.Message}";
         }
-        Console.WriteLine(p_message);
-    }
-    
-    public static string GetEnumDescription(Enum p_value)
-    {
-        var fi = p_value.GetType().GetField(p_value.ToString());
+    }    
 
-        if (fi!.GetCustomAttributes(typeof(DescriptionAttribute), false) is DescriptionAttribute[] attributes && attributes.Any())
-        {
-            return attributes.First().Description;
-        }
-
-        return p_value.ToString();
-    }
 }
