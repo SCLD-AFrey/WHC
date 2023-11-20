@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using WHC.CommonLibrary.Helpers;
-using WHC.CommonLibrary.Models;
+using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Services;
 
 // for (var i = 0; i < 10; i++)

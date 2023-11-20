@@ -7,6 +7,32 @@ namespace WHC.CommonLibrary.Helpers;
 
 public static class BasicUsers
 {
+    public static List<Role> Roles()
+    {
+        return new List<Role>()
+        {
+            new Role()
+            {
+                Name = "Admin",
+                Description = "Administrator"
+            },
+            new Role()
+            {
+                Name = "PowerUser",
+                Description = "Power User"
+            },
+            new Role()
+            {
+                Name = "Editor",
+                Description = "Edit User"
+            },
+            new Role()
+            {
+                Name = "Basic",
+                Description = "Basic User"
+            }
+        };
+    }
     
     public static User AdminUser()
     {

@@ -8,4 +8,6 @@ public class ClientConfiguration
     public DisplayMode DisplayMode { get; set; } = DisplayMode.Light;
     public string ApiKey { get; set; } = string.Empty;
     public string OrgKey { get; set; } = string.Empty;
+    public string OrgName { get; set; } = string.Empty;
+    public int LastLogin { get; set; } = 0;
 }

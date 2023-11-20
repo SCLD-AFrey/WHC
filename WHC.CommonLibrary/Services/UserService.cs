@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WHC.CommonLibrary.DataConn;
-using WHC.CommonLibrary.Enumerations;
 using WHC.CommonLibrary.Helpers;
 using WHC.CommonLibrary.Interfaces;
 using WHC.CommonLibrary.Models;
+using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Models.UserInfo;
 
 namespace WHC.CommonLibrary.Services;
@@ -25,7 +25,28 @@ public class UserService : IUserService, IDisposable
     }
 
     public CurrentUser CurrentUser { get; set; } = new CurrentUser();
-    
+    public User GetUser(int p_userId)
+    {
+        return _appContext.Users.Include(p_x => p_x.Credentials).FirstOrDefault(p_x => p_x.UserOid == p_userId) ?? new User();
+    }
+
+    public User GetUser(string p_username)
+    {
+        return GetUserByUsername(p_username);
+    }
+
+    public User GetUser(User p_user)
+    {
+        if (p_user.UserOid > 0)
+        {
+            return GetUser(p_user.UserOid);
+        }
+        else
+        {
+            return GetUserByUsername(p_user.UserName);
+        }
+    }
+
     private User GetUserByUsername(string username)
     {
         return _appContext.Users
@@ -34,57 +55,70 @@ public class UserService : IUserService, IDisposable
 
     public void InitUsers()
     {
-        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == Helpers.BasicUsers.AdminUser().UserName))
+        foreach (var user in BasicUsers.Roles().Where(user => !_appContext.Roles.Any(p_x => p_x.Name.ToLower() == user.Name.ToLower())))
         {
-            RegisterUser(Helpers.BasicUsers.AdminUser(), "password");
+            _appContext.Roles.Add(user);
+        }
+        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == BasicUsers.AdminUser().UserName))
+        {
+            RegisterUser(BasicUsers.AdminUser(), "password");
         }
 
-        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == Helpers.BasicUsers.BasicUser().UserName))
+        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == BasicUsers.BasicUser().UserName))
         {
-            RegisterUser(Helpers.BasicUsers.BasicUser(), "password");
+            RegisterUser(BasicUsers.BasicUser(), "password");
         }
     }
 
     public LoginAttempt Login(LoginAttempt p_login)
     {
+        LoginAttempt attempt;
         if (!DoesUserExist(p_login.UserName))
         {
-            return new FailedLoginAttempt()
+            attempt = new FailedLoginAttempt()
             {
                 Attempted = DateTime.Now,
                 FailMessage = "User not found"
             };
+            return attempt;
         }
         
         var user = _appContext.Users.Include(p_x => p_x.Credentials).FirstOrDefault(p_x => p_x.UserName.ToLower() == p_login.UserName.ToLower());
         
         var cred = user!.Credentials.LastOrDefault();
         if (cred == null)
-        {
-            return new FailedLoginAttempt()
+        {            
+            attempt = new FailedLoginAttempt()
             {
                 Attempted = DateTime.Now,
                 User = user,
                 FailMessage = "User has no credentials"
             };
+            user.AddLoginAttempt(attempt);
+            return attempt;
         }
 
         var encryptionService = new EncryptionService();
         if (!encryptionService.VerifyPassword(p_login.Password, cred.PasswordHash, cred.Salt))
-        {
-            return new FailedLoginAttempt()
+        {            
+            attempt = new FailedLoginAttempt()
             {
                 Attempted = DateTime.Now,
                 User = user,
                 FailMessage = "Invalid Password"
             };
+            user.AddLoginAttempt(attempt);
+            return attempt;
         }
-
-        return new SuccessfulLoginAttempt()
+        
+        
+        attempt = new SuccessfulLoginAttempt()
         {
             Attempted = DateTime.Now,
             User = user
         };
+        user.AddLoginAttempt(attempt);
+        return attempt;
     }
 
     public void Logout()
@@ -124,7 +158,7 @@ public class UserService : IUserService, IDisposable
     {
         var user = _appContext.Users.FirstOrDefault(p_x => p_x.UserName.ToLower() == p_user.UserName.ToLower());
         if (user == null) return;
-        user.UpdatePassword(p_newPassword);
+        user.AddCredential(p_newPassword);
         _appContext.Update(user);
         _appContext.SaveChanges();
     }
@@ -136,18 +170,17 @@ public class UserService : IUserService, IDisposable
     public User RegisterUser(User p_user, string p_newPassword)
     {
         p_user.UserName = p_user.UserName.ToLower();
-        p_user.UpdatePassword(p_newPassword);
+        p_user.AddCredential(p_newPassword);
         _appContext.Add(p_user);
         _appContext.SaveChanges();
         return p_user;
     }
 
-    public void ChangePassword(User p_user, string p_newPassword, out string p_message, out bool p_success)
+    public void ChangePassword(User p_user, string p_newPassword, out bool p_success)
     {
         p_success = false;
         if (!DoesUserExist(p_user.UserName))
         {
-            p_message = "User not found";
             return;
         }
 
@@ -155,16 +188,14 @@ public class UserService : IUserService, IDisposable
 
         if (prevCreds.Any(cred => _encryptionService.VerifyPassword(p_newPassword, cred.PasswordHash, cred.Salt)))
         {
-            p_message = "Password has been used before";
             return;
         }
         
-        p_user.UpdatePassword(p_newPassword);
+        p_user.AddCredential(p_newPassword);
         _appContext.Update(p_user);
         _appContext.SaveChanges();
         p_success = true;
         
-        p_message = "Password Changed";
     }
 
     public void ResetPassword(User p_user, out string p_password)
@@ -172,7 +203,7 @@ public class UserService : IUserService, IDisposable
         p_password = PasswordGenerator.GenerateReadablePassword();
         var user = _appContext.Users.FirstOrDefault(p_x => p_x.UserName.ToLower() == p_user.UserName.ToLower());
         if (user == null) return;
-        ChangePassword(user, p_password, out var message, out var success);
+        ChangePassword(user, p_password, out var success);
         if (!success)
         {
             ResetPassword(user, out var password);
@@ -187,6 +218,11 @@ public class UserService : IUserService, IDisposable
     private bool DoesUserExist(string p_username)
     {
         return _appContext.Users.Any(p_x => p_x.UserName.ToLower() == p_username.ToLower());
+    }
+    
+    public List<Role> GetRoles()
+    {
+        return _appContext.Roles.ToList();
     }
     
 }

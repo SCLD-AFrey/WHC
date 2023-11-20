@@ -4,7 +4,7 @@ namespace WHC.CommonLibrary.Helpers;
 
 public class EnumTools
 {
-    public static string GetDescription(Enum p_value)
+    public static string GetDescription(Enum p_value) 
     {
         var field = p_value.GetType().GetField(p_value.ToString());
         if (field == null)

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WHC.CommonLibrary.Models;
 using WHC.CommonLibrary.Models.Address;
+using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Models.UserInfo;
 using WHC.CommonLibrary.Services;
 
@@ -9,7 +10,6 @@ namespace WHC.CommonLibrary.DataConn;
 public class ApplicationContext : DbContext
 {
     public DbSet<User> Users { get; set; }
-    public DbSet<LoginAttempt> LoginAttempts { get; set; }
     public DbSet<Role> Roles { get; set; }
     
     private readonly CommonFilesService _commonFilesService = new();
@@ -28,8 +28,6 @@ public class ApplicationContext : DbContext
     {
         modelBuilder.Entity<User>()
             .HasKey(c => c.UserOid);
-        modelBuilder.Entity<EmailAddress>()
-            .HasKey(c => c.Oid);
         modelBuilder.Entity<Credential>()
             .HasKey(c => c.Oid);
         modelBuilder.Entity<LoginAttempt>()
@@ -41,6 +39,10 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<NonUSAddress>()
             .HasKey(c => c.Oid);
         modelBuilder.Entity<PhoneNumber>()
+            .HasKey(c => c.Oid);
+        modelBuilder.Entity<EmailAddress>()
+            .HasKey(c => c.Oid);
+        modelBuilder.Entity<Address>()
             .HasKey(c => c.Oid);
     }
 }
