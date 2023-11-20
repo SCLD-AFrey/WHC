@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using WHC.CommonLibrary.Interfaces;
+using WHC.CommonLibrary.Models;
 
 // ReSharper disable IdentifierTypo
 
@@ -12,9 +14,15 @@ public class EncryptionService : IEncryptionService
     private const int Iterations = 350000;
     private static readonly HashAlgorithmName HashAlgorithm = HashAlgorithmName.SHA512;
 
-    private static readonly byte[] Key = Encoding.UTF8.GetBytes("12345678901234567890123456789012"); // 32 bytes for AES-256
-    private static readonly byte[] Iv = Encoding.UTF8.GetBytes("1234567890123456"); // 16 bytes for AES block size
-
+    public EncryptionService()  
+    {
+        if (EncryptKey == null)
+        {
+            LoadKeysFromJson();
+        }
+    }
+    
+    private EncryptKey? EncryptKey { get; set; } = null;
 
     public string GeneratePasswordHash(string p_password, out byte[] p_salt)
     {
@@ -37,8 +45,8 @@ public class EncryptionService : IEncryptionService
     public string EncryptString(string p_plainText)
     {
         using var aes = Aes.Create();
-        aes.Key = Key;
-        aes.IV = Iv;
+        aes.Key = EncryptKey!.Key;
+        aes.IV = EncryptKey!.Iv;
 
         var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
@@ -57,8 +65,9 @@ public class EncryptionService : IEncryptionService
         var buffer = Convert.FromBase64String(p_cipherText);
 
         using var aes = Aes.Create();
-        aes.Key = Key;
-        aes.IV = Iv;
+
+        aes.Key = EncryptKey!.Key;
+        aes.IV = EncryptKey!.Iv;
 
         var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
@@ -67,5 +76,26 @@ public class EncryptionService : IEncryptionService
         using var srDecrypt = new StreamReader(csDecrypt);
         return srDecrypt.ReadToEnd();
     }
+    
+    private void SaveKeysToJson()
+    {
+        CommonFilesService commonFiles = new();
+        var json = JsonSerializer.Serialize(EncryptKey);
+        File.WriteAllText(commonFiles.KeysFile, json);
+    }
+    
+    private void LoadKeysFromJson()
+    {
+        CommonFilesService commonFiles = new();
+        if (!File.Exists(commonFiles.KeysFile))
+        {
+            EncryptKey = new EncryptKey();
+            SaveKeysToJson();
+        }
+        var json = File.ReadAllText(commonFiles.KeysFile);
+        EncryptKey = JsonSerializer.Deserialize<EncryptKey>(json);
+    }
+    
+
 
 }

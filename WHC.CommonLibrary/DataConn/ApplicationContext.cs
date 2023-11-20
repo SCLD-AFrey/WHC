@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using WHC.CommonLibrary.Models;
 using WHC.CommonLibrary.Models.Address;
 using WHC.CommonLibrary.Models.Login;
@@ -9,20 +10,28 @@ namespace WHC.CommonLibrary.DataConn;
 
 public class ApplicationContext : DbContext
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Role> Roles { get; set; }
+    public DbSet<User>? Users { get; set; }
+    public DbSet<Role>? Roles { get; set; }
     
-    private readonly CommonFilesService _commonFilesService = new();
+    private CommonFilesService _commonFilesService {get; set; }
+
+    private ILogger<ApplicationContext> m_logger { get; set; }
 
     public ApplicationContext()
     {
-        
+        m_logger = new Logger<ApplicationContext>(new LoggerFactory());
+        _commonFilesService = new CommonFilesService();
+        m_logger.LogInformation("Application Context Initialized");
     }
 
-    // The following configures EF to create a Sqlite database file in the
-    // special "local" folder for your platform.
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={_commonFilesService.DbFile}");
+    public ApplicationContext(ILogger<ApplicationContext> p_logger, CommonFilesService p_commonFilesService)
+    {
+        m_logger = p_logger;
+        _commonFilesService = p_commonFilesService;
+        m_logger.LogInformation("Application Context Initialized");
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite($"Data Source={_commonFilesService.DbFile}");
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

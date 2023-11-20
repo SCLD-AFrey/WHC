@@ -9,7 +9,19 @@ public class RolesService : IRolesService
 {
     private readonly ILogger<RolesService> m_logger;
     private readonly ApplicationContext m_appContext;
-    
+
+    public RolesService(ILogger<RolesService> p_logger, ApplicationContext p_appContext)
+    {
+        m_logger = p_logger;
+        m_appContext = p_appContext;
+    }
+
+    public RolesService()
+    {
+        m_logger = new Logger<RolesService>(new LoggerFactory());
+        m_appContext = new ApplicationContext();
+    }
+
     public Role GetRole(int p_id)
     {
         return m_appContext.Roles.FirstOrDefault(p_x => p_x.Oid == p_id);

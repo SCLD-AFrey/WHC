@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using WHC.CommonLibrary.Interfaces;
+using WHC.CommonLibrary.Models;
 using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Services;
 
@@ -7,9 +9,15 @@ using WHC.CommonLibrary.Services;
 // {
 //     Console.WriteLine(PasswordGenerator.GenerateReadablePassword());
 // }
-var userService = new UserService();
 
+
+var encryptor = new EncryptionService();
+var config = new ClientConfigurationService();
+var userService = new UserService();
 userService.InitUsers();
+
+
+var u = new User(1);
 
 var attempt = userService.Login(new LoginAttempt()
 {

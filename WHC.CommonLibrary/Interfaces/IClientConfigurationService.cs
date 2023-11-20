@@ -6,6 +6,6 @@ public interface IClientConfigurationService
 {
     public ClientConfiguration ClientConfig { get; set; }
     public void Init();
-    public void Read();
-    public void Write();
+    public void LoadFromFile();
+    public void SaveToFile();
 }

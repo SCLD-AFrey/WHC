@@ -19,23 +19,32 @@ public class ClientConfigurationService : IClientConfigurationService
         m_logger = p_logger;
         m_commonFiles = p_commonFiles;
         m_encryptionService = p_encryptionService;
+        Init();
+    }
+    
+    public ClientConfigurationService()
+    {
+        m_logger = new Logger<ClientConfigurationService>(new LoggerFactory());
+        m_commonFiles = new CommonFilesService();
+        m_encryptionService = new EncryptionService();
+        LoadFromFile();
+        m_logger.LogInformation($"Client Configuration Initialized");
     }
 
     public ClientConfiguration ClientConfig { get; set; } = new ClientConfiguration();
     
     public void Init()
     {
-        if (File.Exists(m_commonFiles.ConfigPath)) return;
+        if (File.Exists(m_commonFiles.ConfigFile)) return;
         m_logger.LogInformation("Init Preferences");
         ClientConfig = new ClientConfiguration();
-        Write();
-        m_logger.LogInformation($"Client Configuration Initialized");
+        SaveToFile();
     }
     
-    public void Read()
+    public void LoadFromFile()
     {
-        if (!File.Exists(m_commonFiles.ConfigPath)) Init();
-        var json = File.ReadAllText(m_commonFiles.ConfigPath);
+        if (!File.Exists(m_commonFiles.ConfigFile)) Init();
+        var json = File.ReadAllText(m_commonFiles.ConfigFile);
         try
         {
             ClientConfig = JsonSerializer.Deserialize<ClientConfiguration>(m_encryptionService.DecryptString(json)!)!;
@@ -48,12 +57,12 @@ public class ClientConfigurationService : IClientConfigurationService
 
     }
 
-    public void Write()
+    public void SaveToFile()
     {
         try
         {
             var json = JsonSerializer.Serialize(ClientConfig);
-            File.WriteAllText(m_commonFiles.ConfigPath, m_encryptionService.EncryptString(json));
+            File.WriteAllText(m_commonFiles.ConfigFile, m_encryptionService.EncryptString(json));
         }
         catch (Exception ex)
         {

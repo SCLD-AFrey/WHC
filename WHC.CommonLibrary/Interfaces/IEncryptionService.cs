@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace WHC.CommonLibrary.Interfaces;
 
 public interface IEncryptionService
@@ -6,4 +8,5 @@ public interface IEncryptionService
     public bool VerifyPassword(string p_password, string p_hash, byte[] p_salt);
     public string EncryptString(string p_plainText);
     public string? DecryptString(string p_cipherText);
+
 }

@@ -70,7 +70,7 @@ public partial class AdminApp : Application
         await m_appHost.StartAsync();
 
         var configurationService = m_appHost.Services.GetService<ClientConfigurationService>();
-        configurationService!.Read();
+        configurationService!.LoadFromFile();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

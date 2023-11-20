@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WHC.CommonLibrary.DataConn;
+using WHC.CommonLibrary.Enumerations;
 using WHC.CommonLibrary.Helpers;
 using WHC.CommonLibrary.Interfaces;
 using WHC.CommonLibrary.Models;
+using WHC.CommonLibrary.Models.Address;
 using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Models.UserInfo;
 
@@ -16,6 +18,14 @@ public class UserService : IUserService, IDisposable
     private readonly ApplicationContext _appContext;
     private readonly EncryptionService _encryptionService;
 
+
+    public UserService(ILogger<UserService> p_logger, ApplicationContext p_appContext, EncryptionService p_encryptionService)
+    {
+        _logger = p_logger;
+        _appContext = p_appContext;
+        _encryptionService = p_encryptionService;
+        _logger.LogInformation("User Service Initialized");
+    }
     public UserService()
     {
         _logger = new Logger<UserService>(new LoggerFactory());
@@ -23,11 +33,12 @@ public class UserService : IUserService, IDisposable
         _encryptionService = new EncryptionService();
         _logger.LogInformation("User Service Initialized");
     }
+    
 
     public CurrentUser CurrentUser { get; set; } = new CurrentUser();
     public User GetUser(int p_userId)
     {
-        return _appContext.Users.Include(p_x => p_x.Credentials).FirstOrDefault(p_x => p_x.UserOid == p_userId) ?? new User();
+        return _appContext.Users.FirstOrDefault(p_x => p_x.UserOid == p_userId) ?? new User();
     }
 
     public User GetUser(string p_username)
@@ -37,36 +48,65 @@ public class UserService : IUserService, IDisposable
 
     public User GetUser(User p_user)
     {
-        if (p_user.UserOid > 0)
-        {
-            return GetUser(p_user.UserOid);
-        }
-        else
-        {
-            return GetUserByUsername(p_user.UserName);
-        }
+        return p_user.UserOid > 0 
+            ? GetUser(p_user.UserOid) 
+            : GetUserByUsername(p_user.UserName);
     }
 
     private User GetUserByUsername(string username)
     {
-        return _appContext.Users
-            .FirstOrDefault(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase)) ?? new User();
+        if (_appContext.Users != null)
+            return _appContext.Users
+                .FirstOrDefault(u => u.UserName.Equals(username, StringComparison.OrdinalIgnoreCase)) ?? new User();
+        else
+        {
+            _logger.LogError("User Service - GetUserByUsername - Users is null");
+            return new User();
+        }
     }
 
     public void InitUsers()
     {
-        foreach (var user in BasicUsers.Roles().Where(user => !_appContext.Roles.Any(p_x => p_x.Name.ToLower() == user.Name.ToLower())))
+        var users = _appContext.Users!.ToList();
+        var t = users.All(p_x => p_x.UserName.ToLower() != "admin");
+        if (users.All(p_x => p_x.UserName.ToLower() != "admin"))
         {
-            _appContext.Roles.Add(user);
-        }
-        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == BasicUsers.AdminUser().UserName))
-        {
-            RegisterUser(BasicUsers.AdminUser(), "password");
+            RegisterUser(new User()
+            {
+                UserName = "admin",
+                FirstName = "Admin",
+                LastName = "User",
+                EmailAddresses = new List<EmailAddress>()
+                {
+                    new EmailAddress()
+                    {
+                        Address = @"arthur.frey@gmail.com", AddressType = AddressType.Home
+                    }, new EmailAddress()
+                    {
+                        Address = "afrey@steelcloud.com", AddressType = AddressType.Work
+                    }
+                }
+            }, "password");
         }
 
-        if (!_appContext.Users.Any(p_x => p_x.UserName.ToLower() == BasicUsers.BasicUser().UserName))
+        if (users.All(p_x => p_x.UserName.ToLower() != "basic"))
         {
-            RegisterUser(BasicUsers.BasicUser(), "password");
+            RegisterUser(new User()
+            {
+                UserName = "basic",
+                FirstName = "Basic",
+                LastName = "User",
+                EmailAddresses = new List<EmailAddress>()
+                {
+                    new EmailAddress()
+                    {
+                        Address = @"arthur.frey@gmail.com", AddressType = AddressType.Home
+                    },new EmailAddress()
+                    {
+                        Address = @"wvvermin@gmail.com", AddressType = AddressType.Other
+                    }
+                }
+            }, "password");
         }
     }
 
@@ -217,7 +257,7 @@ public class UserService : IUserService, IDisposable
     
     private bool DoesUserExist(string p_username)
     {
-        return _appContext.Users.Any(p_x => p_x.UserName.ToLower() == p_username.ToLower());
+        return _appContext.Users.All(p_x => p_x.UserName.ToLower() != p_username);
     }
     
     public List<Role> GetRoles()

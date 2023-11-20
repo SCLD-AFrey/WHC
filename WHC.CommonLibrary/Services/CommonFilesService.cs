@@ -14,6 +14,7 @@ public class CommonFilesService : ICommonFilesService
     public string ReportsPath { get; set; }
     public string ConfigPath { get; set; }
     public string ConfigFile { get; set; }
+    public string KeysFile { get; set; }
     public string FilesStoragePath { get; set; }
 
     public CommonFilesService()
@@ -44,6 +45,9 @@ public class CommonFilesService : ICommonFilesService
         ConfigFile = Path.Combine(
             ConfigPath, 
             "config.json");
+        KeysFile = Path.Combine(
+            ConfigPath, 
+            "keys.json");
         DbFile = Path.Combine(
             DataPath, 
             "WHCLink.db");

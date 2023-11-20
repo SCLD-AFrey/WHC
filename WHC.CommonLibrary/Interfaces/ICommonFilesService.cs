@@ -10,5 +10,6 @@ public interface ICommonFilesService
     public string ReportsPath { get; set; }
     public string ConfigPath { get; set; }
     public string ConfigFile { get; set; }
+    public string KeysFile { get; set; }
     public string FilesStoragePath { get; set; }
 }

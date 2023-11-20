@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using WHC.CommonLibrary.DataConn;
 using WHC.CommonLibrary.Enumerations;
+using WHC.CommonLibrary.Interfaces;
 using WHC.CommonLibrary.Models.Address;
 using WHC.CommonLibrary.Models.Login;
 using WHC.CommonLibrary.Models.UserInfo;
@@ -28,10 +29,38 @@ public class User
     public User()
     {
     }
-
-    public User(int p_userOid)
+    
+    public User(string p_userName)
     {
+        IUserService userService = new UserService();
+        UserName = p_userName;
+        var user = userService.GetUser(p_userName);
+
+        UserOid = user.UserOid;
+        FirstName = user.FirstName;
+        LastName = user.LastName;
+        EmailAddresses = user.EmailAddresses;
+        Roles = user.Roles;
+        Addresses = user.Addresses;
+        PhoneNumbers = user.PhoneNumbers;
+        Credentials = user.Credentials;
+        LoginAttempts = user.LoginAttempts;
+    }
+    public User(int p_userOid)
+    {        
+        IUserService userService = new UserService();
         UserOid = p_userOid;
+        var user = userService.GetUser(p_userOid);
+
+        UserOid = user.UserOid;
+        FirstName = user.FirstName;
+        LastName = user.LastName;
+        EmailAddresses = user.EmailAddresses;
+        Roles = user.Roles;
+        Addresses = user.Addresses;
+        PhoneNumbers = user.PhoneNumbers;
+        Credentials = user.Credentials;
+        LoginAttempts = user.LoginAttempts;
     }
 
     public override string ToString()
